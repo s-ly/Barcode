@@ -1,80 +1,56 @@
-import numpy as np
-import argparse
-import cv2  # pip install opencv-python
+# Программа для распознавания штрихкода из Google диска.
 
-ap = argparse.ArgumentParser()
-ap.add_argument("-i", "--image", required = True, help = "path to the image file")
-args = vars(ap.parse_args())
+# для Google
+from pydrive.auth import GoogleAuth
+from pydrive.drive import GoogleDrive
 
-
-
-
+# для распознавания 
+from pyzbar.pyzbar import decode
+from PIL import Image  # pip install Pillow
 
 
+# авторизация Google
+gauth = GoogleAuth()
+gauth.LocalWebserverAuth()
+drive = GoogleDrive(gauth)
 
 
+# папка Вагиза
+file_list = drive.ListFile({'q': "'1ECokctvywhiGuJKR0aZJtl_WxL67hkG5' in parents"}).GetList() 
 
 
-
-# load the image and convert it to grayscale
-image = cv2.imread(args["image"])
-gray = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
- 
-# compute the Scharr gradient magnitude representation of the images
-# in both the x and y direction
-# gradX = cv2.Sobel(gray, ddepth = cv2.cv.CV_32F, dx = 1, dy = 0, ksize = -1)
-# gradY = cv2.Sobel(gray, ddepth = cv2.cv.CV_32F, dx = 0, dy = 1, ksize = -1)
-gradX = cv2.Sobel(gray, ddepth = cv2.CV_32F, dx = 1, dy = 0, ksize = -1)
-gradY = cv2.Sobel(gray, ddepth = cv2.CV_32F, dx = 0, dy = 1, ksize = -1)
-
-# gradY = cv2.Sobel(gray, ddepth = cv2.CV_32F
- 
-# subtract the y-gradient from the x-gradient
-gradient = cv2.subtract(gradX, gradY)
-gradient = cv2.convertScaleAbs(gradient)
+img_sum = 0
+for file1 in file_list:
+    img_sum = img_sum + 1
+print('Всего файлов ' + str(img_sum))
+print()
 
 
+i = 0
+barcode_sum = 0
+for file1 in file_list:
+    i = i + 1
+    print('файл ' + str(i) + 'из ' + str(img_sum))
+    # Печать имени и id каждого файла в папке
+    print('title: %s, id: %s' % (file1['title'], file1['id']))
 
+    file_obj = drive.CreateFile({'id': file1['id']})
+    # file_obj.GetContentFile(file1['title']) # записать с реальным именем
+    file_obj.GetContentFile('img_temp.jpg') # записать с общим для всех именем
 
+    image_barcode = Image.open('img_temp.jpg')
+    # image_barcode = Image.open(file_name)
+    img_decode = decode(image_barcode)
 
+    # x = img_decode[0].data.decode('utf-8')
+    if img_decode:
+        print('штрихкод '+ img_decode[0].data.decode('utf-8'))
+        barcode_sum = barcode_sum + 1
+        print('обнаруженно штрихкодов: ' + str(barcode_sum))
+    else:
+        print('нет штрихкода')
+    # print(x)
+    # if (img_decode[0] != None):
+    #     print(img_decode[0].data.decode('utf-8'))
 
-
-
-# blur and threshold the image
-blurred = cv2.blur(gradient, (9, 9))
-(_, thresh) = cv2.threshold(blurred, 225, 255, cv2.THRESH_BINARY)
-
-
-
-
-#  construct a closing kernel and apply it to the thresholded image
-kernel = cv2.getStructuringElement(cv2.MORPH_RECT, (21, 7))
-closed = cv2.morphologyEx(thresh, cv2.MORPH_CLOSE, kernel)
-
-
-
-
-
-# perform a series of erosions and dilations
-closed = cv2.erode(closed, None, iterations = 4)
-closed = cv2.dilate(closed, None, iterations = 4)
-
-
-# find the contours in the thresholded image, then sort the contours
-# by their area, keeping only the largest one
-(cnts, _) = cv2.findContours(closed.copy(), cv2.RETR_EXTERNAL,
-cv2.CHAIN_APPROX_SIMPLE)
-c = sorted(cnts, key = cv2.contourArea, reverse = True)[0]
- 
-# compute the rotated bounding box of the largest contour
-rect = cv2.minAreaRect(c)
-# box = np.int0(cv2.cv.BoxPoints(rect))
-box = np.int0(cv2.boxPoints(rect))
- 
-# draw a bounding box arounded the detected barcode and display the
-# image
-cv2.drawContours(image, [box], -1, (0, 255, 0), 3)
-cv2.imshow("Image", image)
-cv2.waitKey(0)
-
-#  $ python detect_barcode.py --image images/barcode_02.jpg
+print('ИТОГО штрихкодов: ' + str(barcode_sum))

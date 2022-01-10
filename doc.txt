@@ -1,0 +1,12 @@
+Программа для распознавания штрихкода из Google диска.
+
+data.json - для хранения ссылок программы LK
+client_secrets.json - ключ Google API. На git я отправляю только zip-архив с ключём.
+
+Ссылка на тестовую папку Google
+https://drive.google.com/drive/folders/189mCvow7udcR0lmLRZTHmWT5ajQ72Xkx?usp=sharing
+
+папка Вагиза
+https://drive.google.com/drive/folders/1ECokctvywhiGuJKR0aZJtl_WxL67hkG5
+
+
