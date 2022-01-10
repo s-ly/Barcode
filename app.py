@@ -1,3 +1,4 @@
+# BarCode ver 1.0
 # Программа для распознавания штрихкода из Google диска.
 
 # для Google
@@ -8,12 +9,15 @@ from pydrive.drive import GoogleDrive
 from pyzbar.pyzbar import decode
 from PIL import Image  # pip install Pillow
 
+print('BarCode ver 1.0')
+print('Авторизация Google API ...')
 
 # авторизация Google
 gauth = GoogleAuth()
 gauth.LocalWebserverAuth()
 drive = GoogleDrive(gauth)
 
+print('Авторизация Google API получена.')
 
 # папка Вагиза
 file_list = drive.ListFile({'q': "'1ECokctvywhiGuJKR0aZJtl_WxL67hkG5' in parents"}).GetList() 
