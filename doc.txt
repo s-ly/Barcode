@@ -7,7 +7,11 @@ client_secrets.json - ключ Google API. На git я отправляю тол
 Ссылка на тестовую папку Google
 https://drive.google.com/drive/folders/189mCvow7udcR0lmLRZTHmWT5ajQ72Xkx?usp=sharing
 
-папка Вагиза
-https://drive.google.com/drive/folders/1ECokctvywhiGuJKR0aZJtl_WxL67hkG5
+Сборка. При сборка оказалось, что необходимо вручную влючать две библиотеки:
+libiconv.dll и libzbar-64.dll для модуля pyzbar. 
+Их нужно скопировать в рабочий каталог. При отладки сборки, можно использовать
+флаг -w что бы смотреть, что именно не хватает. Думаю, библитотеки стоит обновлять
+при установки модуля pyzbar.
+pyinstaller -F --add-binary="libiconv.dll;." --add-binary="libzbar-64.dll;." app.py
 
 
